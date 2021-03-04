@@ -86,7 +86,7 @@
       </Windows>
     </Window>
 
-    <Window name="MiracleGrowLight">
+    <Window name="MiracleGrowLight" savesettings="true">
       <Size>
         <AbsPoint x="125" y="125" />
       </Size>
