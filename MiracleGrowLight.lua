@@ -1,7 +1,7 @@
 MiracleGrowLight = {}
 
 local windowName = "MiracleGrowLight";
-local version = "1.0.1";
+local version = "1.0.2";
 local realPlot = 0;
 
 function MiracleGrowLight.onHover()
@@ -103,6 +103,22 @@ function MiracleGrowLight.OnUpdate()
     		return
     	end
         local cul = GetCultivationInfo(i);
+        WindowSetShowing(windowName.."Plant"..i.."Button",true)
+        WindowSetShowing(windowName.."Plant"..i.."Harvest",false)
+        LabelSetText(windowName.."Plant"..i.."Time",cul.TotalTimer..L"s");
+        if cul.StageNum==0 then
+            DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Black-Slot");
+        elseif cul.StageNum==1 then
+            DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Dirt");
+        elseif cul.StageNum==2 then
+            DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","WaterDrop");
+        elseif cul.StageNum==3 then
+            DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","GreenCross");
+        elseif cul.StageNum==4 then
+            WindowSetShowing(windowName.."Plant"..i.."Harvest",true)
+            WindowSetShowing(windowName.."Plant"..i.."Button",false)
+            DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestIcon","Square-4");
+        end
         if cul.StageNum==0 or cul.StageNum == 255 then
             numItems=0;
             numItems=table.getn(seeds)
@@ -119,22 +135,6 @@ function MiracleGrowLight.OnUpdate()
                     end
                 end
             end
-        end
-        WindowSetShowing(windowName.."Plant"..i.."Button",true)
-        WindowSetShowing(windowName.."Plant"..i.."Harvest",false)
-        LabelSetText(windowName.."Plant"..i.."Time",cul.TotalTimer..L"s");
-        if cul.StageNum==0 then
-            DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Black-Slot");
-        elseif cul.StageNum==1 then
-            DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Dirt");
-        elseif cul.StageNum==2 then
-            DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","WaterDrop");
-        elseif cul.StageNum==3 then
-            DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","GreenCross");
-        elseif cul.StageNum==4 then
-            WindowSetShowing(windowName.."Plant"..i.."Harvest",true)
-            WindowSetShowing(windowName.."Plant"..i.."Button",false)
-            DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestIcon","Square-4");
         end
     end
 end
