@@ -1,7 +1,7 @@
 MiracleGrowLight = {}
 
 local windowName = "MiracleGrowLight";
-local version = "1.2.1";
+local version = "1.2.2";
 local realPlot = 0;
 local status = {}
 
@@ -58,16 +58,15 @@ function MiracleGrowLight.onZone()
 end
 
 function MiracleGrowLight.Initialize()
-    CreateWindow("MiracleGrowLight", true)
-    LayoutEditor.RegisterWindow( "MiracleGrowLight", L"MiracleGrowLight",L"Planting interface", false, false, true, nil )
+    CreateWindow(windowName.."Anchor", true)
+    CreateWindow(windowName, true)
+    LayoutEditor.RegisterWindow( windowName.."Anchor", windowName.." Anchor",L"Planting interface Anchor", false, false, true, nil )
     RegisterEventHandler(SystemData.Events.LOADING_END, "MiracleGrowLight.onZone")
     for i=1,4 do
         WindowSetGameActionData(windowName.."Plant"..i.."Harvest",GameData.PlayerActions.PERFORM_CRAFTING,GameData.TradeSkills.CULTIVATION,L"")
         DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonFrame","IconFrame-1");
         DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestFrame","IconFrame-1");
-        LabelSetText(windowName.."Plant"..i.."Mode", L"A");
         status[i] = 0
-        LabelSetTextColor(windowName.."Plant"..i.."Mode",225,225,225);
     end
     MiracleGrowLight.onZone()
 end
@@ -137,7 +136,7 @@ function MiracleGrowLight.OnUpdate()
         local cul = GetCultivationInfo(i);
         WindowSetShowing(windowName.."Plant"..i.."Button",true)
         WindowSetShowing(windowName.."Plant"..i.."Harvest",false)
-        LabelSetText(windowName.."Plant"..i.."Time",cul.TotalTimer..L"s");
+        LabelSetText(windowName.."Plant"..i.."Time",cul.TotalTimer..L"");
         if cul.StageNum==1 then
             DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Dirt");
         elseif cul.StageNum==2 then
@@ -189,7 +188,6 @@ function MiracleGrowLight.harvestEnd()
     MiracleGrowLight.OnUpdate()
 end
 function MiracleGrowLight.switchMode()
-    d(L"clicked");
     local mouseWin = SystemData.MouseOverWindow.name
     local but = mouseWin:match("^MiracleGrowLightPlant([0-9]).*")
     but = tonumber(but)
@@ -198,10 +196,10 @@ function MiracleGrowLight.switchMode()
         status[but] = 0
     end
     if status[but] == 1 then
-        LabelSetText(windowName.."Plant"..but.."Mode", L"L");
+        LabelSetTextColor(windowName.."Plant"..but.."Time",100,100,255);--Liniments
     elseif status[but] == 2 then
-        LabelSetText(windowName.."Plant"..but.."Mode", L"N");
+        LabelSetTextColor(windowName.."Plant"..but.."Time",255,180,100);--Off
     elseif status[but] == 0 then
-        LabelSetText(windowName.."Plant"..but.."Mode", L"A");
+        LabelSetTextColor(windowName.."Plant"..but.."Time",225,225,225);--Automatic
     end
 end

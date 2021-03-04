@@ -12,9 +12,6 @@
           <Anchors>
             <Anchor point="center" relativePoint="center" />
           </Anchors>
-          <EventHandlers>
-        	<EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
-          </EventHandlers>
         </DynamicImage>
         <DynamicImage name="$parentIcon" handleinput="false" layer="background" texture="EA_Cultivating01_d5"  texturescale="0.3">
           <Size>
@@ -23,27 +20,25 @@
           <Anchors>
             <Anchor point="center" relativePoint="center" />
           </Anchors>
-          <EventHandlers>
-        	<EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
-          </EventHandlers>
         </DynamicImage>
       </Windows>
     </Button>
 
     <Window name="MiracleGrowLightLine">
       <Size>
-        <AbsPoint x="125" y="28" />
+        <AbsPoint x="82" y="28" />
       </Size>
       <Windows>
         <Label name="$parentTime" inherits="DefaultWindowSmallText" textalign="right">
           <Size>
-            <AbsPoint x="40" y="28" />
+            <AbsPoint x="32" y="28" />
           </Size>
           <Anchors>
             <Anchor point="topleft" relativePoint="topleft" relativeTo="$parent" />
           </Anchors>
           <EventHandlers>
         	<EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
+            <EventHandler event="OnRButtonUp" function="MiracleGrowLight.switchMode" />
           </EventHandlers>
         </Label>
         <Button name="$parentButton" inherits="MiracleGrowLightButton" >
@@ -54,6 +49,7 @@
           </Anchors>
           <EventHandlers>
         	<EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
+            <EventHandler event="OnRButtonUp" function="MiracleGrowLight.switchMode" />
           </EventHandlers>
         </Button>
         <Button name="$parentHarvest" inherits="MiracleGrowLightButton" gameactionbutton="left">
@@ -65,33 +61,29 @@
           <EventHandlers>
             <EventHandler event="OnMouseOver" function="MiracleGrowLight.harvestStart" />
             <EventHandler event="OnLButtonUp" function="MiracleGrowLight.harvestEnd" />
+            <EventHandler event="OnRButtonUp" function="MiracleGrowLight.switchMode" />
             <EventHandler event="OnMouseOverEnd" function="MiracleGrowLight.harvestEnd" />
           </EventHandlers>
         </Button>
-        <Label name="$parentMode" inherits="DefaultWindowSmallText" handleinput="true" font="font_clear_small_bold" textalign="center">
-          <Anchors>
-            <Anchor point="topright" handleinput="true" relativePoint="topleft" relativeTo="$parentTime">
-              <AbsPoint x="40" y="0" />
-            </Anchor>
-        </Anchors>
-          <Size>
-            <AbsPoint x="21" y="21" />
-          </Size>
-          <EventHandlers>
-            <EventHandler event="OnMouseOver" function="MiracleGrowLight.harvestStart" />
-            <EventHandler event="OnLButtonUp" function="MiracleGrowLight.switchMode" />
-            <EventHandler event="OnMouseOverEnd" function="MiracleGrowLight.harvestEnd" />
-          </EventHandlers>
-        </Label>
       </Windows>
     </Window>
 
-    <Window name="MiracleGrowLight" savesettings="true">
+    <Window name="MiracleGrowLightAnchor" savesettings="true">
       <Size>
-        <AbsPoint x="125" y="125" />
+        <AbsPoint x="25" y="25" />
       </Size>
       <Anchors>
-        <Anchor point="left" relativePoint="center" >
+        <Anchor point="left" relativePoint="center"/>
+      </Anchors>
+      <Windows></Windows>
+    </Window>
+
+    <Window name="MiracleGrowLight">
+      <Size>
+        <AbsPoint x="82" y="125" />
+      </Size>
+      <Anchors>
+        <Anchor point="topleft"  relativePoint="topleft" relativeTo="MiracleGrowLightAnchor">
           <AbsPoint x="0" y="0" />
         </Anchor>
       </Anchors>
