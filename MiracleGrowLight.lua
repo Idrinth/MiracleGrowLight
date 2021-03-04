@@ -1,8 +1,9 @@
 MiracleGrowLight = {}
 
 local windowName = "MiracleGrowLight";
-local version = "1.1.0";
+local version = "1.2.0";
 local realPlot = 0;
+local status = {}
 
 function MiracleGrowLight.onHover()
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
@@ -64,6 +65,9 @@ function MiracleGrowLight.Initialize()
         WindowSetGameActionData(windowName.."Plant"..i.."Harvest",GameData.PlayerActions.PERFORM_CRAFTING,GameData.TradeSkills.CULTIVATION,L"")
         DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonFrame","IconFrame-1");
         DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestFrame","IconFrame-1");
+        LabelSetText(windowName.."Plant"..i.."Mode", L"A");
+        status[i] = 0
+        LabelSetTextColor(windowName.."Plant"..i.."Mode",225,225,225);
     end
     MiracleGrowLight.onZone()
 end
@@ -106,11 +110,18 @@ function MiracleGrowLight.getLiniment(items, max)
         end
     end
     table.sort(out, function(a,b)
-        return math.random() > 0;
+        return math.random() > 0.5;
     end)
     return out[1];
 end
-
+function MiracleGrowLight.geFirstSeed(seeds, numItems)
+    for i=1,numItems do
+        if seeds[i] ~= nil then
+            return i
+        end
+    end
+    return -1;
+end
 function MiracleGrowLight.OnUpdate()
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
     local items=DataUtils.GetCraftingItems();
@@ -118,7 +129,6 @@ function MiracleGrowLight.OnUpdate()
     local numSeedsRemaining=-1;
     local numSeedsIndex=1;
     local seeds=MiracleGrowLight.getSeedList(items, max);
-    local liniment=MiracleGrowLight.getLiniment(items, max);
     for i=1,4 do
     	local unlocked = 50 * tonumber(i) - 50;
     	if unlocked > max then
@@ -139,21 +149,24 @@ function MiracleGrowLight.OnUpdate()
             WindowSetShowing(windowName.."Plant"..i.."Button",false)
             DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestIcon","Square-4");
         elseif cul.StageNum==0 or cul.StageNum == 255 then
-        	 DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Black-Slot");
-        	if i == 1 and liniment then
+        	DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Black-Slot");
+            local liniment=MiracleGrowLight.getLiniment(items, max);
+        	if liniment and status[i] == 1 then
 				AddCraftingItem( 3, i, liniment.invIndex, EA_Window_Backpack.TYPE_CRAFTING )    
-        	else
+        	elseif status[i] < 2 and seeds~=nil then
 	            numItems=0;
 	            numItems=table.getn(seeds)
-	            if numSeedsRemaining < 0 then
-	              numSeedsRemaining=seeds[1].item.stackCount
+                local firstSeed = MiracleGrowLight.geFirstSeed(seeds, numItems)
+	            if numSeedsRemaining < 0 and firstSeed > 0 then
+                    numSeedsRemaining=seeds[firstSeed].item.stackCount
+                    numSeedsIndex = firstSeed;
 	            end
 	            if numItems > 0 and numSeedsRemaining > 0 then
 	                AddCraftingItem( 3, i, seeds[numSeedsIndex].invIndex, EA_Window_Backpack.TYPE_CRAFTING )
 	                numSeedsRemaining=numSeedsRemaining-1
 	                if numSeedsRemaining <= 0 then
-	                    numSeedsIndex=numSeedsIndex+1
-	                    if numSeedsIndex <= numItems then
+	                    numSeedsIndex=MiracleGrowLight.geFirstSeed(seeds, numItems)
+	                    if numSeedsIndex <= numItems and numSeedsIndex > 0 then
 	                      numSeedsRemaining=seeds[numSeedsIndex].item.stackCount
 	                    end
 	                end
@@ -174,4 +187,21 @@ end
 function MiracleGrowLight.harvestEnd()
     GameData.Player.Cultivation.CurrentPlot=realPlot
     MiracleGrowLight.OnUpdate()
+end
+function MiracleGrowLight.switchMode()
+    d(L"clicked");
+    local mouseWin = SystemData.MouseOverWindow.name
+    local but = mouseWin:match("^MiracleGrowLightPlant([0-9]).*")
+    but = tonumber(but)
+    status[but] = status[but] + 1
+    if status[but] > 3 then
+        status[but] = 0
+    end
+    if status[but] == 1 then
+        LabelSetText(windowName.."Plant"..but.."Mode", L"L");
+    elseif status[but] == 2 then
+        LabelSetText(windowName.."Plant"..but.."Mode", L"N");
+    elseif status[but] == 0 then
+        LabelSetText(windowName.."Plant"..but.."Mode", L"A");
+    end
 end

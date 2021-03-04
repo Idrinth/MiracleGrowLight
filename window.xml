@@ -32,7 +32,7 @@
 
     <Window name="MiracleGrowLightLine">
       <Size>
-        <AbsPoint x="100" y="28" />
+        <AbsPoint x="125" y="28" />
       </Size>
       <Windows>
         <Label name="$parentTime" inherits="DefaultWindowSmallText" textalign="right">
@@ -68,12 +68,27 @@
             <EventHandler event="OnMouseOverEnd" function="MiracleGrowLight.harvestEnd" />
           </EventHandlers>
         </Button>
+        <Label name="$parentMode" inherits="DefaultWindowSmallText" handleinput="true" font="font_clear_small_bold" textalign="center">
+          <Anchors>
+            <Anchor point="topright" handleinput="true" relativePoint="topleft" relativeTo="$parentTime">
+              <AbsPoint x="40" y="0" />
+            </Anchor>
+        </Anchors>
+          <Size>
+            <AbsPoint x="21" y="21" />
+          </Size>
+          <EventHandlers>
+            <EventHandler event="OnMouseOver" function="MiracleGrowLight.harvestStart" />
+            <EventHandler event="OnLButtonUp" function="MiracleGrowLight.switchMode" />
+            <EventHandler event="OnMouseOverEnd" function="MiracleGrowLight.harvestEnd" />
+          </EventHandlers>
+        </Label>
       </Windows>
     </Window>
 
-    <Window name="MiracleGrowLight" savesettings="true">
+    <Window name="MiracleGrowLight">
       <Size>
-        <AbsPoint x="100" y="125" />
+        <AbsPoint x="125" y="125" />
       </Size>
       <Anchors>
         <Anchor point="left" relativePoint="center" >
