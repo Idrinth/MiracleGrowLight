@@ -1,7 +1,7 @@
 MiracleGrowLight = {}
 
 local windowName = "MiracleGrowLight";
-local version = "1.2.3";
+local version = "1.2.2";
 local realPlot = 0;
 local status = {}
 
@@ -121,7 +121,15 @@ function MiracleGrowLight.geFirstSeed(seeds, numItems)
     end
     return -1;
 end
-function MiracleGrowLight.OnUpdate()
+
+local elapsed2 = 0
+
+function MiracleGrowLight.OnUpdate(elapsed)
+	elapsed2 = elapsed2 + elapsed
+	if (elapsed2 < 0.5) then return -- work only every 0.5 sec, perfomance increase
+	else
+		elapsed2 = 0
+	end
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
     local items=DataUtils.GetCraftingItems();
     local numItems=0;
@@ -185,7 +193,7 @@ end
 
 function MiracleGrowLight.harvestEnd()
     GameData.Player.Cultivation.CurrentPlot=realPlot
-    MiracleGrowLight.OnUpdate()
+    --MiracleGrowLight.OnUpdate() WTF is that? OnUpdate already execute every game tick
 end
 function MiracleGrowLight.switchMode()
     local mouseWin = SystemData.MouseOverWindow.name
