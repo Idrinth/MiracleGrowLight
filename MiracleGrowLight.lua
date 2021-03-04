@@ -1,31 +1,48 @@
 MiracleGrowLight = {}
 
 local windowName = "MiracleGrowLight";
-local version = "1.0.0";
+local version = "1.0.1";
 local realPlot = 0;
 
 function MiracleGrowLight.onHover()
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
     local name = SystemData.MouseOverWindow.name
+    local currentPlants = L"";
     Tooltips.CreateTextOnlyTooltip ( SystemData.ActiveWindow.name )
-    Tooltips.SetTooltipText( 1, 1, L"Plot Status")
-    local pos = 1;
+    Tooltips.SetTooltipText( 1, 1, L"Status")
+    local seeds=MiracleGrowLight.getList(max);
+    local out={};
     for i=1,4 do
         local unlocked = 50 * tonumber(i) - 50;
         if max > unlocked then
-        	pos = i+1;
             local plotData = GetCultivationInfo(i)
             local currentPlant = plotData["PlantName"]
-            if not currentPlant then
-                currentPlant = L"None"
+            if currentPlant ~= L"" and currentPlant ~= nil then
+            	if not out[currentPlant] then
+            		out[currentPlant] = 1;
+            	else 
+            		out[currentPlant] = out[currentPlant] + 1;
+            	end
             end
-            Tooltips.SetTooltipText( i+1, 1, L"Plot "..towstring(i)..L" - "..currentPlant)
         end
     end
-    Tooltips.SetTooltipText( pos +1, 1, L"Cultivation: "..max)
-    Tooltips.SetTooltipText( pos +2, 1, L"Apothecary: "..GameData.TradeSkillLevels[GameData.TradeSkills.APOTHECARY])
+    for name,amount in pairs(out) do
+    	d(name)
+    	if currentPlants ~= L"" then
+    		currentPlants = currentPlants..L", "
+    	end
+        currentPlants = currentPlants..amount..L"x "..name
+    end
+    Tooltips.SetTooltipText( 2, 1, L"Plots: "..currentPlants)
+    local next = L"";
+    if seeds[1] then
+    	next = seeds[1].item.name
+    end
+    Tooltips.SetTooltipText( 3, 1, L"Next: "..next)
+    Tooltips.SetTooltipText( 4, 1, L"Cultivation: "..max)
+    Tooltips.SetTooltipText( 5, 1, L"Apothecary: "..GameData.TradeSkillLevels[GameData.TradeSkills.APOTHECARY])
     Tooltips.Finalize()
-    local anchor = { Point = "topright",  RelativeTo = name, RelativePoint = "topleft",   XOffset = 10, YOffset = 0 }
+    local anchor = { Point = "topright",  RelativeTo = "MiracleGrowLight", RelativePoint = "topleft",   XOffset = 10, YOffset = 0 }
     Tooltips.AnchorTooltip( anchor )
 end
 
