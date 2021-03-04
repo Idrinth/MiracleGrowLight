@@ -1,7 +1,7 @@
 MiracleGrowLight = {}
 
 local windowName = "MiracleGrowLight";
-local version = "1.2.2";
+local version = "1.2.3";
 local realPlot = 0;
 local status = {}
 

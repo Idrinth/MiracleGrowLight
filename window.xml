@@ -89,7 +89,6 @@
       </Anchors>
 
       <EventHandlers>
-        <EventHandler event="OnInitialize" function="MiracleGrowLight.Initialize" />
         <EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
       </EventHandlers>
       <Windows>
