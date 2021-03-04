@@ -1,19 +1,18 @@
 MiracleGrowLight = {}
 
 local windowName = "MiracleGrowLight";
-local version = "1.2.5";
+local version = "1.2.6";
 local realPlot = 0;
 local status = {}
 local sinceUpdated = 0;
 
 function MiracleGrowLight.onHover()
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
-    local name = SystemData.MouseOverWindow.name
     local currentPlants = L"";
-    Tooltips.CreateTextOnlyTooltip ( SystemData.ActiveWindow.name )
+    Tooltips.CreateTextOnlyTooltip ( SystemData.MouseOverWindow.name )
     Tooltips.SetTooltipText( 1, 1, L"Status")
     local items = DataUtils.GetCraftingItems();
-    local seeds=MiracleGrowLight.getSeedList(items, max);
+    local seed=MiracleGrowLight.getSeed(items, max);
     local out={};
     for i=1,4 do
         local unlocked = 50 * tonumber(i) - 50;
@@ -22,9 +21,9 @@ function MiracleGrowLight.onHover()
             local currentPlant = plotData["PlantName"]
             if currentPlant ~= L"" and currentPlant ~= nil then
             	if not out[currentPlant] then
-            		out[currentPlant] = 1;
+            	    out[currentPlant] = 1;
             	else 
-            		out[currentPlant] = out[currentPlant] + 1;
+            	    out[currentPlant] = out[currentPlant] + 1;
             	end
             end
         end
@@ -40,8 +39,8 @@ function MiracleGrowLight.onHover()
     end
     Tooltips.SetTooltipText( 2, 1, L"Plots: "..currentPlants)
     local next = L"";
-    if seeds[1] then
-    	next = seeds[1].item.name
+    if seed then
+    	next = seed.item.name
     end
     Tooltips.SetTooltipText( 3, 1, L"Next: "..(next:gsub(L" Seed", L"")))
     Tooltips.SetTooltipText( 4, 1, L"Cultivation: "..max)
@@ -73,17 +72,23 @@ function MiracleGrowLight.Initialize()
     MiracleGrowLight.onZone()
 end
 
-function MiracleGrowLight.getSeedList(items, max)
+function MiracleGrowLight.getSeed(items, max)
+    if max == 0 then
+        return nil;
+    end
     local i=1;
     local out={};
-    if max == 0 then
-        return out;
-    end
+    local positions = {}
     for index,itemdata in pairs(items) do
         if itemdata.cultivationType==GameData.CultivationTypes.SPORE or itemdata.cultivationType==GameData.CultivationTypes.SEED then
             if max >= itemdata.craftingSkillRequirement then
-                out[i]={invIndex=index,item=itemdata};
-                i=i+1;
+                if positions[itemdata.name] then
+                    out[positions[itemdata.name]].item.stackCount = out[positions[itemdata.name]].item.stackCount + itemdata.stackCount;
+                else
+                    out[i]={invIndex=index,item=itemdata};
+                    positions[itemdata.name] = i;
+                    i=i+1;
+                end
             end
         end
     end
@@ -93,7 +98,7 @@ function MiracleGrowLight.getSeedList(items, max)
         end
         return a["item"].craftingSkillRequirement<b["item"].craftingSkillRequirement
     end)
-    return out;
+    return out[1];
 end
 
 function MiracleGrowLight.getLiniment(items, max)
@@ -115,26 +120,13 @@ function MiracleGrowLight.getLiniment(items, max)
     end)
     return out[1];
 end
-function MiracleGrowLight.geFirstSeed(seeds, numItems)
-    for i=1,numItems do
-        if seeds[i] ~= nil then
-            return i
-        end
-    end
-    return -1;
-end
 function MiracleGrowLight.OnUpdate(elapsed)
     sinceUpdated = sinceUpdated + elapsed
-    if (sinceUpdated < 0.5) then
-        return -- work only every 0.5 sec, perfomance increase
+    if (sinceUpdated < 0.75) then
+        return -- update in reasonable steps only
     end
     sinceUpdated = 0
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
-    local items=DataUtils.GetCraftingItems();
-    local numItems=0;
-    local numSeedsRemaining=-1;
-    local numSeedsIndex=1;
-    local seeds=MiracleGrowLight.getSeedList(items, max);
     for i=1,4 do
     	local unlocked = 50 * tonumber(i) - 50;
     	if unlocked > max then
@@ -156,27 +148,13 @@ function MiracleGrowLight.OnUpdate(elapsed)
             DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestIcon","Square-4");
         elseif cul.StageNum==0 or cul.StageNum == 255 then
         	DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Black-Slot");
+            local items=DataUtils.GetCraftingItems();
             local liniment=MiracleGrowLight.getLiniment(items, max);
+            local seed=MiracleGrowLight.getSeed(items, max);
         	if liniment and status[i] == 1 then
 				AddCraftingItem( 3, i, liniment.invIndex, EA_Window_Backpack.TYPE_CRAFTING )    
-        	elseif status[i] < 2 and seeds~=nil then
-	            numItems=0;
-	            numItems=table.getn(seeds)
-                local firstSeed = MiracleGrowLight.geFirstSeed(seeds, numItems)
-	            if numSeedsRemaining < 0 and firstSeed > 0 then
-                    numSeedsRemaining=seeds[firstSeed].item.stackCount
-                    numSeedsIndex = firstSeed;
-	            end
-	            if numItems > 0 and numSeedsRemaining > 0 then
-	                AddCraftingItem( 3, i, seeds[numSeedsIndex].invIndex, EA_Window_Backpack.TYPE_CRAFTING )
-	                numSeedsRemaining=numSeedsRemaining-1
-	                if numSeedsRemaining <= 0 then
-	                    numSeedsIndex=MiracleGrowLight.geFirstSeed(seeds, numItems)
-	                    if numSeedsIndex <= numItems and numSeedsIndex > 0 then
-	                      numSeedsRemaining=seeds[numSeedsIndex].item.stackCount
-	                    end
-	                end
-	            end
+        	elseif status[i] < 2 and seed~=nil then
+	            AddCraftingItem( 3, i, seed.invIndex, EA_Window_Backpack.TYPE_CRAFTING )
 	        end
         end
     end
