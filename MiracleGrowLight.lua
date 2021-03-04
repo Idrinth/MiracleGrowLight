@@ -1,7 +1,7 @@
 MiracleGrowLight = {}
 
 local windowName = "MiracleGrowLight";
-local version = "1.0.2";
+local version = "1.1.0";
 local realPlot = 0;
 
 function MiracleGrowLight.onHover()
@@ -10,7 +10,8 @@ function MiracleGrowLight.onHover()
     local currentPlants = L"";
     Tooltips.CreateTextOnlyTooltip ( SystemData.ActiveWindow.name )
     Tooltips.SetTooltipText( 1, 1, L"Status")
-    local seeds=MiracleGrowLight.getList(max);
+    local items = DataUtils.GetCraftingItems();
+    local seeds=MiracleGrowLight.getSeedList(items, max);
     local out={};
     for i=1,4 do
         local unlocked = 50 * tonumber(i) - 50;
@@ -67,8 +68,7 @@ function MiracleGrowLight.Initialize()
     MiracleGrowLight.onZone()
 end
 
-function MiracleGrowLight.getList(max)
-    local items=DataUtils.GetCraftingItems();
+function MiracleGrowLight.getSeedList(items, max)
     local i=1;
     local out={};
     if max == 0 then
@@ -91,12 +91,34 @@ function MiracleGrowLight.getList(max)
     return out;
 end
 
+function MiracleGrowLight.getLiniment(items, max)
+    if max < 200 then
+        return nil;
+    end
+    local i=1;
+    local out={};
+    for index,itemdata in pairs(items) do
+        if itemdata.cultivationType==GameData.CultivationTypes.SPORE or itemdata.cultivationType==GameData.CultivationTypes.SEED then
+            if itemdata.rarity >= 4 then -- blue or higher
+                out[i]={invIndex=index}
+                i=i+1;
+            end
+        end
+    end
+    table.sort(out, function(a,b)
+        return math.random() > 0;
+    end)
+    return out[1];
+end
+
 function MiracleGrowLight.OnUpdate()
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
+    local items=DataUtils.GetCraftingItems();
     local numItems=0;
     local numSeedsRemaining=-1;
     local numSeedsIndex=1;
-    local seeds=MiracleGrowLight.getList(max);
+    local seeds=MiracleGrowLight.getSeedList(items, max);
+    local liniment=MiracleGrowLight.getLiniment(items, max);
     for i=1,4 do
     	local unlocked = 50 * tonumber(i) - 50;
     	if unlocked > max then
@@ -106,9 +128,7 @@ function MiracleGrowLight.OnUpdate()
         WindowSetShowing(windowName.."Plant"..i.."Button",true)
         WindowSetShowing(windowName.."Plant"..i.."Harvest",false)
         LabelSetText(windowName.."Plant"..i.."Time",cul.TotalTimer..L"s");
-        if cul.StageNum==0 then
-            DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Black-Slot");
-        elseif cul.StageNum==1 then
+        if cul.StageNum==1 then
             DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Dirt");
         elseif cul.StageNum==2 then
             DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","WaterDrop");
@@ -118,23 +138,27 @@ function MiracleGrowLight.OnUpdate()
             WindowSetShowing(windowName.."Plant"..i.."Harvest",true)
             WindowSetShowing(windowName.."Plant"..i.."Button",false)
             DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestIcon","Square-4");
-        end
-        if cul.StageNum==0 or cul.StageNum == 255 then
-            numItems=0;
-            numItems=table.getn(seeds)
-            if numSeedsRemaining < 0 then
-              numSeedsRemaining=seeds[1].item.stackCount
-            end
-            if numItems > 0 and numSeedsRemaining > 0 then
-                AddCraftingItem( 3, i, seeds[numSeedsIndex].invIndex, EA_Window_Backpack.TYPE_CRAFTING )
-                numSeedsRemaining=numSeedsRemaining-1
-                if numSeedsRemaining <= 0 then
-                    numSeedsIndex=numSeedsIndex+1
-                    if numSeedsIndex <= numItems then
-                      numSeedsRemaining=seeds[numSeedsIndex].item.stackCount
-                    end
-                end
-            end
+        elseif cul.StageNum==0 or cul.StageNum == 255 then
+        	 DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Black-Slot");
+        	if i == 1 and liniment then
+				AddCraftingItem( 3, i, liniment.invIndex, EA_Window_Backpack.TYPE_CRAFTING )    
+        	else
+	            numItems=0;
+	            numItems=table.getn(seeds)
+	            if numSeedsRemaining < 0 then
+	              numSeedsRemaining=seeds[1].item.stackCount
+	            end
+	            if numItems > 0 and numSeedsRemaining > 0 then
+	                AddCraftingItem( 3, i, seeds[numSeedsIndex].invIndex, EA_Window_Backpack.TYPE_CRAFTING )
+	                numSeedsRemaining=numSeedsRemaining-1
+	                if numSeedsRemaining <= 0 then
+	                    numSeedsIndex=numSeedsIndex+1
+	                    if numSeedsIndex <= numItems then
+	                      numSeedsRemaining=seeds[numSeedsIndex].item.stackCount
+	                    end
+	                end
+	            end
+	        end
         end
     end
 end
