@@ -3,8 +3,7 @@
 	<UiMod name="MiracleGrowLight" version="1.2.6" date="2021-01-23" >
     <VersionSettings gameVersion="1.4.8" windowsVersion="1.40" savedVariablesVersion="1.50" />
 
-		<Author name="Idrinth"/>
-		<Author name="Yun"/>
+		<Author name="Idrinth, Yun"/>
 		<Description text="Modifies the cultivation interface heavily based on MiracleGrow and adds auto-refill" />
 		<Dependencies>
 			<Dependency name="EA_BankWindow" />
