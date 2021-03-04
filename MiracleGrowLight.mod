@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ModuleFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<UiMod name="MiracleGrowLight" version="1.2.4" date="2021-03-03" >
+	<UiMod name="MiracleGrowLight" version="1.2.5" date="2021-01-23" >
     <VersionSettings gameVersion="1.4.8" windowsVersion="1.40" savedVariablesVersion="1.50" />
 
 		<Author name="Idrinth"/>
+		<Author name="Yun"/>
 		<Description text="Modifies the cultivation interface heavily based on MiracleGrow and adds auto-refill" />
 		<Dependencies>
 			<Dependency name="EA_BankWindow" />

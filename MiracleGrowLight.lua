@@ -1,9 +1,10 @@
 MiracleGrowLight = {}
 
 local windowName = "MiracleGrowLight";
-local version = "1.2.2";
+local version = "1.2.5";
 local realPlot = 0;
 local status = {}
+local sinceUpdated = 0;
 
 function MiracleGrowLight.onHover()
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
@@ -29,20 +30,21 @@ function MiracleGrowLight.onHover()
         end
     end
     for name,amount in pairs(out) do
-    	d(name)
     	if currentPlants ~= L"" then
     		currentPlants = currentPlants..L", "
     	end
-        currentPlants = currentPlants..amount..L"x "..name
+        if amount > 1 then
+            currentPlants = currentPlants..amount..L"x "
+        end
+        currentPlants = currentPlants..(name:gsub(L" Seed", L""))
     end
     Tooltips.SetTooltipText( 2, 1, L"Plots: "..currentPlants)
     local next = L"";
     if seeds[1] then
     	next = seeds[1].item.name
     end
-    Tooltips.SetTooltipText( 3, 1, L"Next: "..next)
+    Tooltips.SetTooltipText( 3, 1, L"Next: "..(next:gsub(L" Seed", L"")))
     Tooltips.SetTooltipText( 4, 1, L"Cultivation: "..max)
-    Tooltips.SetTooltipText( 5, 1, L"Apothecary: "..GameData.TradeSkillLevels[GameData.TradeSkills.APOTHECARY])
     Tooltips.Finalize()
     local anchor = { Point = "topright",  RelativeTo = "MiracleGrowLight", RelativePoint = "topleft",   XOffset = 10, YOffset = 0 }
     Tooltips.AnchorTooltip( anchor )
@@ -121,15 +123,12 @@ function MiracleGrowLight.geFirstSeed(seeds, numItems)
     end
     return -1;
 end
-
-local elapsed2 = 0
-
 function MiracleGrowLight.OnUpdate(elapsed)
-	elapsed2 = elapsed2 + elapsed
-	if (elapsed2 < 0.5) then return -- work only every 0.5 sec, perfomance increase
-	else
-		elapsed2 = 0
-	end
+    sinceUpdated = sinceUpdated + elapsed
+    if (sinceUpdated < 0.5) then
+        return -- work only every 0.5 sec, perfomance increase
+    end
+    sinceUpdated = 0
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
     local items=DataUtils.GetCraftingItems();
     local numItems=0;
@@ -193,7 +192,6 @@ end
 
 function MiracleGrowLight.harvestEnd()
     GameData.Player.Cultivation.CurrentPlot=realPlot
-    --MiracleGrowLight.OnUpdate() WTF is that? OnUpdate already execute every game tick
 end
 function MiracleGrowLight.switchMode()
     local mouseWin = SystemData.MouseOverWindow.name
