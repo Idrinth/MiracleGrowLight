@@ -1,0 +1,121 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+  <Windows>
+    <Button name="MiracleGrowLightButton" inherits="EA_Button_Default" backgroundtexture="EA_Cultivating01_d5" highlighttexture="EA_Cultivating01_d5" drawchildrenfirst="true"  texturescale="0.3">
+      <Size>
+        <AbsPoint x="21" y="21" />
+      </Size>
+      <Windows>
+        <DynamicImage name="$parentFrame" handleinput="false" layer="background" texture="EA_Cultivating01_d5"  texturescale="0.3">
+          <Size>
+            <AbsPoint x="20" y="20" />
+          </Size>
+          <Anchors>
+            <Anchor point="center" relativePoint="center" />
+          </Anchors>
+          <EventHandlers>
+        	<EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
+          </EventHandlers>
+        </DynamicImage>
+        <DynamicImage name="$parentIcon" handleinput="false" layer="background" texture="EA_Cultivating01_d5"  texturescale="0.3">
+          <Size>
+            <AbsPoint x="18" y="18" />
+          </Size>
+          <Anchors>
+            <Anchor point="center" relativePoint="center" />
+          </Anchors>
+          <EventHandlers>
+        	<EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
+          </EventHandlers>
+        </DynamicImage>
+      </Windows>
+    </Button>
+
+    <Window name="MiracleGrowLightLine">
+      <Size>
+        <AbsPoint x="100" y="28" />
+      </Size>
+      <Windows>
+        <Label name="$parentTime" inherits="DefaultWindowSmallText" textalign="right">
+          <Size>
+            <AbsPoint x="40" y="28" />
+          </Size>
+          <Anchors>
+            <Anchor point="topleft" relativePoint="topleft" relativeTo="$parent" />
+          </Anchors>
+          <EventHandlers>
+        	<EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
+          </EventHandlers>
+        </Label>
+        <Button name="$parentButton" inherits="MiracleGrowLightButton" >
+          <Anchors>
+            <Anchor point="topright" relativePoint="topleft" relativeTo="$parentTime" >
+              <AbsPoint x="10" y="0" />
+            </Anchor>
+          </Anchors>
+          <EventHandlers>
+        	<EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
+          </EventHandlers>
+        </Button>
+        <Button name="$parentHarvest" inherits="MiracleGrowLightButton" gameactionbutton="left">
+          <Anchors>
+            <Anchor point="topright" relativePoint="topleft" relativeTo="$parentTime">
+              <AbsPoint x="10" y="0" />
+            </Anchor>
+          </Anchors>
+          <EventHandlers>
+            <EventHandler event="OnMouseOver" function="MiracleGrowLight.harvestStart" />
+            <EventHandler event="OnLButtonUp" function="MiracleGrowLight.harvestEnd" />
+            <EventHandler event="OnMouseOverEnd" function="MiracleGrowLight.harvestEnd" />
+          </EventHandlers>
+        </Button>
+      </Windows>
+    </Window>
+
+    <Window name="MiracleGrowLight" savesettings="true">
+      <Size>
+        <AbsPoint x="100" y="125" />
+      </Size>
+      <Anchors>
+        <Anchor point="left" relativePoint="center" >
+          <AbsPoint x="0" y="0" />
+        </Anchor>
+      </Anchors>
+
+      <EventHandlers>
+        <EventHandler event="OnInitialize" function="MiracleGrowLight.Initialize" />
+        <EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
+      </EventHandlers>
+      <Windows>
+        <FullResizeImage name="$parentBackground" inherits="DefaultWindowBackground">
+          <Anchors>
+            <Anchor point="topleft" relativePoint="topleft" relativeTo=""/>
+            <Anchor point="bottomright" relativePoint="bottomright" relativeTo=""/>
+          </Anchors>
+        </FullResizeImage>
+
+        <Window name="$parentPlant1" inherits="MiracleGrowLightLine">
+          <Anchors>
+            <Anchor point="topleft" relativePoint="topleft">
+              <AbsPoint x="10" y="10" />
+            </Anchor>
+          </Anchors>
+        </Window>
+        <Window name="$parentPlant2" inherits="MiracleGrowLightLine">
+          <Anchors>
+            <Anchor point="bottomleft" relativePoint="topleft" relativeTo="$parentPlant1" />
+          </Anchors>
+        </Window>
+        <Window name="$parentPlant3" inherits="MiracleGrowLightLine">
+          <Anchors>
+            <Anchor point="bottomleft" relativePoint="topleft" relativeTo="$parentPlant2" />
+          </Anchors>
+        </Window>
+        <Window name="$parentPlant4" inherits="MiracleGrowLightLine">
+          <Anchors>
+            <Anchor point="bottomleft" relativePoint="topleft" relativeTo="$parentPlant3" />
+          </Anchors>
+        </Window>
+      </Windows>
+    </Window>
+  </Windows>
+</Interface>
