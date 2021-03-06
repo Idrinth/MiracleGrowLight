@@ -1,7 +1,7 @@
 MiracleGrowLight = {}
 
 local windowName = "MiracleGrowLight";
-local version = "1.2.6";
+local version = "1.2.7";
 local realPlot = 0;
 local status = {}
 local sinceUpdated = 0;
@@ -21,9 +21,9 @@ function MiracleGrowLight.onHover()
             local currentPlant = plotData["PlantName"]
             if currentPlant ~= L"" and currentPlant ~= nil then
             	if not out[currentPlant] then
-            	    out[currentPlant] = 1;
+            		out[currentPlant] = 1;
             	else 
-            	    out[currentPlant] = out[currentPlant] + 1;
+            		out[currentPlant] = out[currentPlant] + 1;
             	end
             end
         end
@@ -38,11 +38,11 @@ function MiracleGrowLight.onHover()
         currentPlants = currentPlants..(name:gsub(L" Seed", L""))
     end
     Tooltips.SetTooltipText( 2, 1, L"Plots: "..currentPlants)
-    local next = L"";
     if seed then
-    	next = seed.item.name
+    	Tooltips.SetTooltipText( 3, 1, L"Next: "..(seed.item.name:gsub(L" Seed", L"")))
+    else
+    	Tooltips.SetTooltipText( 3, 1, L"Next: -")
     end
-    Tooltips.SetTooltipText( 3, 1, L"Next: "..(next:gsub(L" Seed", L"")))
     Tooltips.SetTooltipText( 4, 1, L"Cultivation: "..max)
     Tooltips.Finalize()
     local anchor = { Point = "topright",  RelativeTo = "MiracleGrowLight", RelativePoint = "topleft",   XOffset = 10, YOffset = 0 }
