@@ -1,22 +1,35 @@
-MiracleGrowLight = {}
+MiracleGrowLight = {
+    Settings={
+        mode={0, 0, 0, 0}
+    }
+}
 
 local windowName = "MiracleGrowLight";
-local version = "1.2.7";
+local version = "1.3.0";
 local realPlot = 0;
-local status = {}
 local sinceUpdated = 0;
+local background = true;
+local modeNames = {
+    "Automatic",
+    "Liniments",
+    "Off",
+    "First"
+}
 
 function MiracleGrowLight.onHover()
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
     local currentPlants = L"";
+    local modes=L"";
     Tooltips.CreateTextOnlyTooltip ( SystemData.MouseOverWindow.name )
     Tooltips.SetTooltipText( 1, 1, L"Status")
-    local items = DataUtils.GetCraftingItems();
-    local seed=MiracleGrowLight.getSeed(items, max);
     local out={};
     for i=1,4 do
         local unlocked = 50 * tonumber(i) - 50;
         if max > unlocked then
+            if modes ~= L"" then
+                modes = modes..L", "
+            end
+            modes = modes..towstring(modeNames[MiracleGrowLight.Settings.mode[i] +1])
             local plotData = GetCultivationInfo(i)
             local currentPlant = plotData["PlantName"]
             if currentPlant ~= L"" and currentPlant ~= nil then
@@ -38,11 +51,7 @@ function MiracleGrowLight.onHover()
         currentPlants = currentPlants..(name:gsub(L" Seed", L""))
     end
     Tooltips.SetTooltipText( 2, 1, L"Plots: "..currentPlants)
-    if seed then
-    	Tooltips.SetTooltipText( 3, 1, L"Next: "..(seed.item.name:gsub(L" Seed", L"")))
-    else
-    	Tooltips.SetTooltipText( 3, 1, L"Next: -")
-    end
+    Tooltips.SetTooltipText( 3, 1, L"Modes: "..modes)
     Tooltips.SetTooltipText( 4, 1, L"Cultivation: "..max)
     Tooltips.Finalize()
     local anchor = { Point = "topright",  RelativeTo = "MiracleGrowLight", RelativePoint = "topleft",   XOffset = 10, YOffset = 0 }
@@ -51,31 +60,14 @@ end
 
 function MiracleGrowLight.onZone()
     if GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION] == 0 then
-        WindowSetShowing(windowName, false);
+        WindowSetShowing(windowName, false)
     else
-        WindowSetShowing(windowName, true);
+        WindowSetShowing(windowName, true)
         CultivationWindow.UpdateAllPlots()
     end
 end
 
-function MiracleGrowLight.Initialize()
-    CreateWindow(windowName.."Anchor", true)
-    CreateWindow(windowName, true)
-    LayoutEditor.RegisterWindow( windowName.."Anchor", windowName.." Anchor",L"Planting interface Anchor", false, false, true, nil )
-    RegisterEventHandler(SystemData.Events.LOADING_END, "MiracleGrowLight.onZone")
-    for i=1,4 do
-        WindowSetGameActionData(windowName.."Plant"..i.."Harvest",GameData.PlayerActions.PERFORM_CRAFTING,GameData.TradeSkills.CULTIVATION,L"")
-        DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonFrame","IconFrame-1");
-        DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestFrame","IconFrame-1");
-        status[i] = 0
-    end
-    MiracleGrowLight.onZone()
-end
-
-function MiracleGrowLight.getSeed(items, max)
-    if max == 0 then
-        return nil;
-    end
+local function getSeed(items, max)
     local i=1;
     local out={};
     local positions = {}
@@ -101,7 +93,7 @@ function MiracleGrowLight.getSeed(items, max)
     return out[1];
 end
 
-function MiracleGrowLight.getLiniment(items, max)
+local function getLiniment(items, max)
     if max < 200 then
         return nil;
     end
@@ -120,6 +112,14 @@ function MiracleGrowLight.getLiniment(items, max)
     end)
     return out[1];
 end
+local function getFirst(items, max)
+    for index,itemdata in pairs(items) do
+        if itemdata.cultivationType==GameData.CultivationTypes.SPORE or itemdata.cultivationType==GameData.CultivationTypes.SEED then
+            return {invIndex=index}
+        end
+    end
+    return nil;
+end
 function MiracleGrowLight.OnUpdate(elapsed)
     sinceUpdated = sinceUpdated + elapsed
     if (sinceUpdated < 0.75) then
@@ -127,6 +127,10 @@ function MiracleGrowLight.OnUpdate(elapsed)
     end
     sinceUpdated = 0
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
+    if max == 0 then
+        return
+    end
+    local isSeedless = false
     for i=1,4 do
     	local unlocked = 50 * tonumber(i) - 50;
     	if unlocked > max then
@@ -148,14 +152,26 @@ function MiracleGrowLight.OnUpdate(elapsed)
             DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestIcon","Square-4");
         elseif cul.StageNum==0 or cul.StageNum == 255 then
         	DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Black-Slot");
-            local items=DataUtils.GetCraftingItems();
-            local liniment=MiracleGrowLight.getLiniment(items, max);
-            local seed=MiracleGrowLight.getSeed(items, max);
-        	if liniment and status[i] == 1 then
-				AddCraftingItem( 3, i, liniment.invIndex, EA_Window_Backpack.TYPE_CRAFTING )    
-        	elseif status[i] < 2 and seed~=nil then
-	            AddCraftingItem( 3, i, seed.invIndex, EA_Window_Backpack.TYPE_CRAFTING )
-	        end
+            if MiracleGrowLight.Settings.mode[i] ~= 2 and not isSeedless then
+                local items=DataUtils.GetCraftingItems();
+                local seed=getSeed(items, max);
+                local liniment = nil
+                local first = nil
+                if MiracleGrowLight.Settings.mode[i] == 1 then
+                    liniment=getLiniment(items, max);
+                elseif MiracleGrowLight.Settings.mode[i] == 3 then
+                    first=getFirst(items, max);
+                end
+            	if liniment~=nil then
+                    AddCraftingItem( 3, i, liniment.invIndex, EA_Window_Backpack.TYPE_CRAFTING )    
+                elseif first~=nil then
+                    AddCraftingItem( 3, i, first.invIndex, EA_Window_Backpack.TYPE_CRAFTING )    
+                elseif seed~=nil then
+    	            AddCraftingItem( 3, i, seed.invIndex, EA_Window_Backpack.TYPE_CRAFTING )
+                else
+                    isSeedless=true
+    	        end
+            end
         end
     end
 end
@@ -171,19 +187,53 @@ end
 function MiracleGrowLight.harvestEnd()
     GameData.Player.Cultivation.CurrentPlot=realPlot
 end
+
+local function setMode(button)
+    if MiracleGrowLight.Settings.mode[button] == 1 then
+        LabelSetTextColor(windowName.."Plant"..button.."Time",100,100,255);--Liniments
+    elseif MiracleGrowLight.Settings.mode[button] == 2 then
+        LabelSetTextColor(windowName.."Plant"..button.."Time",255,180,100);--Off
+    elseif MiracleGrowLight.Settings.mode[button] == 3 then
+        LabelSetTextColor(windowName.."Plant"..button.."Time",100,225,100);--First Avaible Slot
+    else
+        MiracleGrowLight.Settings.mode[button] = 0
+        LabelSetTextColor(windowName.."Plant"..button.."Time",225,225,225);--Automatic
+    end
+    TextLogAddEntry("Chat", SystemData.ChatLogFilters.CRAFTING, towstring("Pot "..button.." set to mode "..modeNames[MiracleGrowLight.Settings.mode[button] + 1]))
+end
 function MiracleGrowLight.switchMode()
     local mouseWin = SystemData.MouseOverWindow.name
     local but = mouseWin:match("^MiracleGrowLightPlant([0-9]).*")
     but = tonumber(but)
-    status[but] = status[but] + 1
-    if status[but] > 3 then
-        status[but] = 0
+    MiracleGrowLight.Settings.mode[but] = MiracleGrowLight.Settings.mode[but] + 1
+    setMode(but)
+end
+
+function MiracleGrowLight.switchBackground()
+    MiracleGrowLight.Settings.background = not MiracleGrowLight.Settings.background
+    WindowSetShowing(windowName.."Background", MiracleGrowLight.Settings.background)
+end
+
+function MiracleGrowLight.Initialize()
+    CreateWindow(windowName.."Anchor", true)
+    CreateWindow(windowName, true)
+    LayoutEditor.RegisterWindow( windowName.."Anchor", windowName.." Anchor",L"Planting interface Anchor", false, false, true, nil )
+    RegisterEventHandler(SystemData.Events.LOADING_END, "MiracleGrowLight.onZone")
+    if MiracleGrowLight.Settings == nil then
+        MiracleGrowLight.Settings = {}
     end
-    if status[but] == 1 then
-        LabelSetTextColor(windowName.."Plant"..but.."Time",100,100,255);--Liniments
-    elseif status[but] == 2 then
-        LabelSetTextColor(windowName.."Plant"..but.."Time",255,180,100);--Off
-    elseif status[but] == 0 then
-        LabelSetTextColor(windowName.."Plant"..but.."Time",225,225,225);--Automatic
+    if MiracleGrowLight.Settings.mode == nil then
+        MiracleGrowLight.Settings.mode = {0, 0, 0, 0}
     end
+    MiracleGrowLight.Settings.showing = not MiracleGrowLight.Settings.showing
+    MiracleGrowLight.Settings.background = not MiracleGrowLight.Settings.background
+    for i=1,4 do
+        WindowSetGameActionData(windowName.."Plant"..i.."Harvest",GameData.PlayerActions.PERFORM_CRAFTING,GameData.TradeSkills.CULTIVATION,L"")
+        DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonFrame","IconFrame-1");
+        DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestFrame","IconFrame-1");
+        setMode(i)
+    end
+    LabelSetText(windowName.."Version", towstring("MGL"..version));
+    MiracleGrowLight.onZone()
+    MiracleGrowLight.switchBackground()
 end

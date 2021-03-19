@@ -89,6 +89,7 @@
       </Anchors>
 
       <EventHandlers>
+        <EventHandler event="OnRButtonUp" function="MiracleGrowLight.switchBackground" />
         <EventHandler event="OnMouseOver" function="MiracleGrowLight.onHover" />
       </EventHandlers>
       <Windows>
