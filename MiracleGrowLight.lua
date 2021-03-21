@@ -1,14 +1,14 @@
 MiracleGrowLight = {
     Settings={
         mode={0, 0, 0, 0}
-    }
+    },
+    version = "1.3.2"
 }
 
+local MiracleGrowLight = MiracleGrowLight;
 local windowName = "MiracleGrowLight";
-local version = "1.3.0";
 local realPlot = 0;
 local sinceUpdated = 0;
-local background = true;
 local modeNames = {
     "Automatic",
     "Liniments",
@@ -54,7 +54,14 @@ function MiracleGrowLight.onHover()
     Tooltips.SetTooltipText( 3, 1, L"Modes: "..modes)
     Tooltips.SetTooltipText( 4, 1, L"Cultivation: "..max)
     Tooltips.Finalize()
-    local anchor = { Point = "topright",  RelativeTo = "MiracleGrowLight", RelativePoint = "topleft",   XOffset = 10, YOffset = 0 }
+    local rootWidth,rootHeight = WindowGetDimensions("Root")
+    local mglX,mglY = WindowGetScreenPosition(windowName)
+    local anchor = nil
+    if mglX*2 > rootWidth then
+        anchor = { Point = "topleft",  RelativeTo = windowName, RelativePoint = "topright",   XOffset = -10, YOffset = 0 }
+    else
+        anchor = { Point = "topright",  RelativeTo = windowName, RelativePoint = "topleft",   XOffset = 10, YOffset = 0 }
+    end
     Tooltips.AnchorTooltip( anchor )
 end
 
@@ -127,7 +134,7 @@ function MiracleGrowLight.OnUpdate(elapsed)
     end
     sinceUpdated = 0
     local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
-    if max == 0 then
+    if max == 0 or max == nil then
         return
     end
     local isSeedless = false
@@ -217,7 +224,7 @@ end
 function MiracleGrowLight.Initialize()
     CreateWindow(windowName.."Anchor", true)
     CreateWindow(windowName, true)
-    LayoutEditor.RegisterWindow( windowName.."Anchor", windowName.." Anchor",L"Planting interface Anchor", false, false, true, nil )
+    LayoutEditor.RegisterWindow( windowName.."Anchor", towstring(windowName.." Anchor"),L"Planting interface Anchor", false, false, true, nil )
     RegisterEventHandler(SystemData.Events.LOADING_END, "MiracleGrowLight.onZone")
     if MiracleGrowLight.Settings == nil then
         MiracleGrowLight.Settings = {}
@@ -225,7 +232,6 @@ function MiracleGrowLight.Initialize()
     if MiracleGrowLight.Settings.mode == nil then
         MiracleGrowLight.Settings.mode = {0, 0, 0, 0}
     end
-    MiracleGrowLight.Settings.showing = not MiracleGrowLight.Settings.showing
     MiracleGrowLight.Settings.background = not MiracleGrowLight.Settings.background
     for i=1,4 do
         WindowSetGameActionData(windowName.."Plant"..i.."Harvest",GameData.PlayerActions.PERFORM_CRAFTING,GameData.TradeSkills.CULTIVATION,L"")
@@ -233,7 +239,6 @@ function MiracleGrowLight.Initialize()
         DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestFrame","IconFrame-1");
         setMode(i)
     end
-    LabelSetText(windowName.."Version", towstring("MGL"..version));
     MiracleGrowLight.onZone()
     MiracleGrowLight.switchBackground()
 end
