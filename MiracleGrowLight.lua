@@ -2,7 +2,7 @@ MiracleGrowLight = {
     Settings={
         mode={0, 0, 0, 0}
     },
-    version = "1.3.2"
+    version = "1.3.3"
 }
 
 local MiracleGrowLight = MiracleGrowLight;
@@ -159,7 +159,7 @@ function MiracleGrowLight.OnUpdate(elapsed)
             DynamicImageSetTextureSlice(windowName.."Plant"..i.."HarvestIcon","Square-4");
         elseif cul.StageNum==0 or cul.StageNum == 255 then
         	DynamicImageSetTextureSlice(windowName.."Plant"..i.."ButtonIcon","Black-Slot");
-            if MiracleGrowLight.Settings.mode[i] ~= 2 and not isSeedless then
+            if MiracleGrowLight.Settings.mode[i] ~= 2 and not isSeedless and GameData.Player.hitPoints.current > 0 then
                 local items=DataUtils.GetCraftingItems();
                 local seed=getSeed(items, max);
                 local liniment = nil
