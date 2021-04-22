@@ -2,7 +2,7 @@ MiracleGrowLight = {
     Settings={
         mode={0, 0, 0, 0}
     },
-    version = "1.3.3"
+    version = "1.3.4"
 }
 
 local MiracleGrowLight = MiracleGrowLight;
@@ -114,10 +114,7 @@ local function getLiniment(items, max)
             end
         end
     end
-    table.sort(out, function(a,b)
-        return math.random() > 0.5;
-    end)
-    return out[1];
+    return out[math.random(#out)];
 end
 local function getFirst(items, max)
     for index,itemdata in pairs(items) do
