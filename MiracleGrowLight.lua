@@ -2,7 +2,7 @@ MiracleGrowLight = {
     Settings={
         mode={0, 0, 0, 0}
     },
-    version = "1.3.4"
+    version = "1.3.5"
 }
 
 local MiracleGrowLight = MiracleGrowLight;
@@ -17,7 +17,7 @@ local modeNames = {
 }
 
 function MiracleGrowLight.onHover()
-    local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
+    local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION] or 0;
     local currentPlants = L"";
     local modes=L"";
     Tooltips.CreateTextOnlyTooltip ( SystemData.MouseOverWindow.name )
@@ -130,8 +130,8 @@ function MiracleGrowLight.OnUpdate(elapsed)
         return -- update in reasonable steps only
     end
     sinceUpdated = 0
-    local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION];
-    if max == 0 or max == nil then
+    local max=GameData.TradeSkillLevels[GameData.TradeSkills.CULTIVATION] or 0;
+    if max == 0 then
         return
     end
     local isSeedless = false
